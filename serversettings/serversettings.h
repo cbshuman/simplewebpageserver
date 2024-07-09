@@ -5,6 +5,7 @@ struct serverSettings
   {
     int port;
     int max_connections;
+    char* serverPath;
   };
 
 struct serverSettings readParams(int argCount, char* args[]);

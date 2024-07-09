@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../utilities/tolower.h"
@@ -8,6 +7,7 @@ struct serverSettings
   {
     int port;
     int max_connections;
+    char * serverPath;
   };
 
 struct serverSettings readParams(int argCount, char* args[])
@@ -41,6 +41,17 @@ struct serverSettings readParams(int argCount, char* args[])
       i++;
       settings.max_connections = atoi(args[i]);
       printf("setting max connections to %d\n", settings.max_connections);
+      }
+
+    if(strcmp(args[i],"path") == 0)
+      {
+      if(i+1 >= argCount)
+        {
+        return settings;
+        }
+      i++;
+      settings.serverPath = args[i];
+      printf("Setting path to '%s'", settings.serverPath);
       }
     }
 

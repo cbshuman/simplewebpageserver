@@ -85,12 +85,27 @@ int main(int argc, char* argv[])
     if(FD_ISSET(server_socket, &readfds))
       {
       client_sock = accept(server_socket, (struct sockaddr *)&client_address, &client_len);
-      printf("Client reached out");
       memset(buffer, 0, BUFFER_SIZE);
       read(client_sock, buffer, BUFFER_SIZE - 1);
-      const char *header = "HTTP/1.1 200 OK\r\nContent-Type: text/plain";
-      const char *content = "Hello, World!";
+
+      char method[16], path[256], protocol[16];
+      sscanf(buffer, "%s %s %s", method, path, protocol);
+
+
+      char *header = "HTTP/1.1 200 OK\r\nContent-Type: text/html";
+      //const char *content = "<html><body> <b>Hello to the World!</b></body></html>";
+
+      char *content = malloc(100);
+
+      strcat(content, "<html><body><b>");
+
+      strcat(content, path);
+      strcat(content, "<b></body></html>");
+
+
       respond(client_sock, header, content);
+
+      printf("%s, %s, %s", method,path,protocol);
       }
     }
 
