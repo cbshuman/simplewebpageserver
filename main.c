@@ -1,12 +1,10 @@
 #include <stdio.h>
 #include <errno.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#include "utilities/tolower.h"
 #include "serversettings/serversettings.h"
 
 const int BUFFER_SIZE = 1020;
