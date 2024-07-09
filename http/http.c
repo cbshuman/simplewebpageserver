@@ -1,7 +1,8 @@
+#include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 
-const int BUFFER_SIZE = 1024
+const int BUFFER_SIZE = 1024;
 
 void respond(int client_sock, const char *header, const char *content) 
   {
