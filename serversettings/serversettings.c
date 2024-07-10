@@ -51,7 +51,7 @@ struct serverSettings readParams(int argCount, char* args[])
         }
       i++;
       settings.serverPath = args[i];
-      printf("Setting path to '%s'", settings.serverPath);
+      printf("Setting path to '%s'\n", settings.serverPath);
       }
     }
 
