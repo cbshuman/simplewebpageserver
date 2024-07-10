@@ -29,7 +29,6 @@ int main(int argc, char* argv[])
   struct sockaddr_in server_address, client_address;
   socklen_t client_len = sizeof(client_address);
 
-  char buffer[BUFFER_SIZE];
 
   memset(&server_address, 0, sizeof(server_address));
   server_address.sin_family = AF_INET;
@@ -56,8 +55,6 @@ int main(int argc, char* argv[])
   listen(server_socket, _server.max_connections);
   printf("Listening on port %d\n", _server.port);
 
-  int client_sock;
-
   while(1)
     {
     FD_ZERO(&readfds);
@@ -77,32 +74,19 @@ int main(int argc, char* argv[])
 
     if(FD_ISSET(server_socket, &readfds))
       {
-      client_sock = accept(server_socket, (struct sockaddr *)&client_address, &client_len);
-      memset(buffer, 0, BUFFER_SIZE);
-      read(client_sock, buffer, BUFFER_SIZE - 1);
-
-      char method[16], path[256], protocol[16];
-      sscanf(buffer, "%s %s %s", method, path, protocol);
-
+      struct ClientInformation clientInfo = GetClientConnection(server_socket);
 
       char *header = "HTTP/1.1 200 OK\r\nContent-Type: text/html";
-      //const char *content = "<html><body> <b>Hello to the World!</b></body></html>";
 
       char *content = malloc(100);
 
       strcat(content, "<html><body><b>");
-
-      strcat(content, path);
+      strcat(content, clientInfo.path);
       strcat(content, "<b></body></html>");
 
-
-      respond(client_sock, header, content);
-
-      printf("%s, %s, %s", method,path,protocol);
+      respond(clientInfo.client_socket, header, content);
       }
     }
-
-  printf("We outa here");
 
   close(server_socket);
   return 0;

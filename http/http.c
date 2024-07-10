@@ -11,7 +11,10 @@ const int BUFFER_SIZE = 1024;
 
 struct ClientInformation 
   {
-  int client_socket; 
+  int client_socket;
+  char* path;
+  char* protocol;
+  char* method;
   };
 
 struct ClientInformation GetClientConnection(int server_socket)
@@ -34,7 +37,9 @@ struct ClientInformation GetClientConnection(int server_socket)
   char *header = "HTTP/1.1 200 OK\r\nContent-Type: text/html";
 
   clientInfo.client_socket = client_sock;
-
+  clientInfo.path = path;
+  clientInfo.protocol = protocol;
+  clientInfo.method = method;
 
   return clientInfo;
   }

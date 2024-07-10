@@ -1,12 +1,14 @@
-#ifndef SERVERSETTINGS_H
-#define SERVERSETTINGS_H
+#ifndef HTTPHELPER_H
+#define HTTPHELPER_H
 
 struct ClientInformation 
   {
-  int client_socket; 
+  int client_socket;
+  char* path;
+  char* protocol;
+  char* method;
   };
 
-const int BUFFER_SIZE = 1024;
 void respond(int client_sock, const char *header, const char *content);
 struct ClientInformation GetClientConnection(int server_socket);
 
