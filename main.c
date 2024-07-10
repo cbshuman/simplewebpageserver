@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 #include "serversettings/serversettings.h"
 #include "http/http.h"
-
+#include "webserverengine/webserverengine.h"
 
 int main(int argc, char* argv[]) 
   {
@@ -76,15 +76,16 @@ int main(int argc, char* argv[])
       {
       struct ClientInformation clientInfo = GetClientConnection(server_socket);
 
-      char *header = "HTTP/1.1 200 OK\r\nContent-Type: text/html";
+      printf("client path %s\n\n", clientInfo.path);
+
+      struct generated_response response = GenerateResponse(clientInfo);
 
       char *content = malloc(100);
 
-      strcat(content, "<html><body><b>");
-      strcat(content, clientInfo.path);
+      strcat(content, "<html><body><b> Gonna replace me soon");
       strcat(content, "<b></body></html>");
 
-      respond(clientInfo.client_socket, header, content);
+      respond(clientInfo.client_socket, response.headers, content);
       }
     }
 

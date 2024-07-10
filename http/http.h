@@ -4,9 +4,7 @@
 struct ClientInformation 
   {
   int client_socket;
-  char* path;
-  char* protocol;
-  char* method;
+  char method[16], path[256], protocol[16];
   };
 
 void respond(int client_sock, const char *header, const char *content);

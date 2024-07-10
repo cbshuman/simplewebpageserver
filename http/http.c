@@ -6,15 +6,14 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "../utilities/tolower.h"
 
 const int BUFFER_SIZE = 1024;
 
 struct ClientInformation 
   {
   int client_socket;
-  char* path;
-  char* protocol;
-  char* method;
+  char method[16], path[256], protocol[16];
   };
 
 struct ClientInformation GetClientConnection(int server_socket)
@@ -31,15 +30,20 @@ struct ClientInformation GetClientConnection(int server_socket)
   memset(buffer, 0, BUFFER_SIZE);
   read(client_sock, buffer, BUFFER_SIZE - 1);
 
-  char method[16], path[256], protocol[16];
-  sscanf(buffer, "%s %s %s", method, path, protocol);
+  sscanf(buffer, "%s %s %s",clientInfo.method, clientInfo.path, clientInfo.protocol);
 
-  char *header = "HTTP/1.1 200 OK\r\nContent-Type: text/html";
+  //printf("Path Read from buffer:'%s' \n", path);
 
   clientInfo.client_socket = client_sock;
-  clientInfo.path = path;
-  clientInfo.protocol = protocol;
-  clientInfo.method = method;
+  //clientInfo.path = path;
+  //clientInfo.protocol = protocol;
+  //clientInfo.method = method;
+
+  toLower(clientInfo.path);
+  toLower(clientInfo.protocol);
+  toLower(clientInfo.method);
+  
+  printf("Path Read from buffer:'%s' \n\n", clientInfo.path);
 
   return clientInfo;
   }
