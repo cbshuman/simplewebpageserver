@@ -9,6 +9,6 @@ struct generated_response
     char* content;
   };
 
-struct generated_response GenerateResponse(struct ClientInformation clientInfo);
+struct generated_response GenerateResponse(char* fileLocation, struct ClientInformation clientInfo);
 
 #endif

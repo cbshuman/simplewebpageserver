@@ -2,12 +2,46 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <pthread.h>
 #include "serversettings/serversettings.h"
 #include "http/http.h"
 #include "webserverengine/webserverengine.h"
+
+struct ThreadArgs {
+    int server_socket;
+    struct serverSettings server;
+};
+
+void* HandleClientRequest(void *args)
+  {
+  struct ThreadArgs* arguments = (struct ThreadArgs *)args;
+
+  printf("\n\n --- New Request --- \n");
+  struct ClientInformation clientInfo = GetClientConnection(arguments->server_socket);
+  struct generated_response response = GenerateResponse(arguments->server.serverPath, clientInfo);
+
+  printf("Responding to client sock %d \n", clientInfo.client_socket);
+  respond(clientInfo.client_socket, response.headers, response.content);
+  printf("Sent response \n");
+
+  if(response.content != NULL)
+    {
+    printf("clearing response");
+    free(response.content);
+    response.content = NULL;
+    }
+
+  printf("Closing Thread");
+  close(clientInfo.client_socket);
+  free(args);
+  pthread_exit(NULL);
+  return NULL;
+  }
+
 
 int main(int argc, char* argv[]) 
   {
@@ -74,18 +108,13 @@ int main(int argc, char* argv[])
 
     if(FD_ISSET(server_socket, &readfds))
       {
-      struct ClientInformation clientInfo = GetClientConnection(server_socket);
+        struct ThreadArgs* args = (struct ThreadArgs *)malloc(sizeof(struct ThreadArgs));
+        args->server_socket = server_socket;
+        args->server = _server;
 
-      printf("client path %s\n\n", clientInfo.path);
-
-      struct generated_response response = GenerateResponse(clientInfo);
-
-      char *content = malloc(100);
-
-      strcat(content, "<html><body><b> Gonna replace me soon");
-      strcat(content, "<b></body></html>");
-
-      respond(clientInfo.client_socket, response.headers, content);
+        pthread_t thread_id;
+        pthread_create(&thread_id, NULL, HandleClientRequest, (void *)args);
+        pthread_detach(thread_id); 
       }
     }
 
