@@ -1,3 +1,4 @@
+#include <netinet/in.h>
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -18,27 +19,13 @@ struct ThreadArgs {
 
 void* HandleClientRequest(void *args)
   {
-  struct ThreadArgs* arguments = (struct ThreadArgs *)args;
+  int client_socket = *(int *)args;
 
-  printf("\n\n --- New Request --- \n");
-  struct ClientInformation clientInfo = GetClientConnection(arguments->server_socket);
-  struct generated_response response = GenerateResponse(arguments->server.serverPath, clientInfo);
+  struct ClientInformation clientInfo = GetClientConnection(client_socket);
 
-  printf("Responding to client sock %d \n", clientInfo.client_socket);
-  respond(clientInfo.client_socket, response.headers, response.content);
-  printf("Sent response \n");
+  printf("Responding to client sock %d \n", client_socket);
+  printf("Method: %s \n", clientInfo.method);
 
-  if(response.content != NULL)
-    {
-    printf("clearing response");
-    free(response.content);
-    response.content = NULL;
-    }
-
-  printf("Closing Thread");
-  close(clientInfo.client_socket);
-  free(args);
-  pthread_exit(NULL);
   return NULL;
   }
 
@@ -91,31 +78,18 @@ int main(int argc, char* argv[])
 
   while(1)
     {
-    FD_ZERO(&readfds);
-    FD_SET(server_socket,&readfds);
+    struct sockaddr_in clientAddress;
+    socklen_t clientAddressLength = sizeof(clientAddress);
+    int *client_fd = malloc(sizeof(int));
 
-    int selection = select(server_socket+1, &readfds, NULL, NULL, &timeout);
-
-    if ((selection < 0) && (errno != EINTR)) 
-      {
-      printf("select error");
-      }
-
-    if (selection == 0) 
+    if((*client_fd = accept(server_socket,(struct sockaddr*)&client_address,&client_len)) < 0) 
       {
       continue;
       }
 
-    if(FD_ISSET(server_socket, &readfds))
-      {
-        struct ThreadArgs* args = (struct ThreadArgs *)malloc(sizeof(struct ThreadArgs));
-        args->server_socket = server_socket;
-        args->server = _server;
-
-        pthread_t thread_id;
-        pthread_create(&thread_id, NULL, HandleClientRequest, (void *)args);
-        pthread_detach(thread_id); 
-      }
+    pthread_t thread;
+    pthread_create(&thread, NULL, HandleClientRequest,(void *)client_fd);
+    pthread_detach(thread);
     }
 
   close(server_socket);

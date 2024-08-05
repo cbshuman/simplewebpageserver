@@ -16,22 +16,20 @@ struct ClientInformation
   char method[16], path[256], protocol[16];
   };
 
-struct ClientInformation GetClientConnection(int server_socket)
+struct ClientInformation GetClientConnection(int client_sock)
   {
   struct ClientInformation clientInfo = {};
   
   struct sockaddr_in client_address;
   socklen_t client_len = sizeof(client_address);
 
-  int client_sock = accept(server_socket, (struct sockaddr *)&client_address, &client_len);
+  //int client_sock = accept(server_socket, (struct sockaddr *)&client_address, &client_len);
 
   char buffer[BUFFER_SIZE];
   ssize_t bytes_recieved = recv(client_sock, buffer, BUFFER_SIZE, 0);
   if(bytes_recieved > 0)
     {
     read(client_sock, buffer, BUFFER_SIZE - 1);
-
-    printf("%s", buffer);
 
     sscanf(buffer, "%s %s %s",clientInfo.method, clientInfo.path, clientInfo.protocol);
 
@@ -41,7 +39,7 @@ struct ClientInformation GetClientConnection(int server_socket)
     toLower(clientInfo.protocol);
     toLower(clientInfo.method);
     }
-  
+
   return clientInfo;
   }
 
