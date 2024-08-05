@@ -83,15 +83,15 @@ int main(int argc, char* argv[])
     {
     struct sockaddr_in clientAddress;
     socklen_t clientAddressLength = sizeof(clientAddress);
-    int *client_fd = malloc(sizeof(int));
+    int client_fd;
 
-    if((*client_fd = accept(server_socket,(struct sockaddr*)&client_address,&client_len)) < 0) 
+    if((client_fd = accept(server_socket,(struct sockaddr*)&client_address,&client_len)) < 0) 
       {
       continue;
       }
 
     struct ThreadArgs* args = (struct ThreadArgs *)malloc(sizeof(struct ThreadArgs));
-    args->client_socket = *client_fd;
+    args->client_socket = client_fd;
     args->server = _server;
 
     pthread_t thread;
