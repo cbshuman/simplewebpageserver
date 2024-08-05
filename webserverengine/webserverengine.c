@@ -54,6 +54,8 @@ char* ReadFile(char* filePath)
     printf("Cannot read file %s", filePath);
     }
   fclose(filePointer);
+
+  printf("%s", source);
   return source;
   }
 
@@ -66,30 +68,6 @@ struct generated_response GenerateResponse(char* fileLocation, struct ClientInfo
   printf("protocol: %s\n", clientInfo.protocol);
 
   //Need to find a way to differentiate between an API call and regular ol' file requests.
-
-  if(strcmp(clientInfo.method,"get") == 0)
-    {
-    response.headers = "HTTP/1.1 200 OK\r\nContent-Type: text/html";
-
-    char* filePath = clientInfo.path;
-    if(strcmp(clientInfo.path,"/") == 0)
-      {
-        filePath = "/index.html";
-      }
-
-    char* destination = calloc(sizeof(fileLocation) + sizeof(filePath)+10, 1);
-    strcat(destination, fileLocation);
-    strcat(destination, filePath);
-
-    response.content = ReadFile(destination);
-    free(destination);
-    }
-
-  if(response.content == NULL)
-    {
-      response.headers = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html";
-      response.content = "Content not Found";
-    }
 
   printf("returning: %s\n", response.content);
   return response;

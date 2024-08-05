@@ -13,19 +13,22 @@
 #include "webserverengine/webserverengine.h"
 
 struct ThreadArgs {
-    int server_socket;
+    int client_socket;
     struct serverSettings server;
 };
 
 void* HandleClientRequest(void *args)
   {
-  int client_socket = *(int *)args;
+  struct ThreadArgs* arguments = (struct ThreadArgs *)args;
+  struct ClientInformation clientInfo = GetClientConnection(arguments->client_socket);
 
-  struct ClientInformation clientInfo = GetClientConnection(client_socket);
+  printf("\n - - New Request - - Responding to client sock %d \n", arguments->client_socket);
+  GenerateResponse(arguments->server.serverPath,clientInfo);
 
-  printf("Responding to client sock %d \n", client_socket);
-  printf("Method: %s \n", clientInfo.method);
+  respond(arguments->client_socket, "HTTP/1.1 200 OK\r\nContent-Type: text/html", "<b> hello World</b>\n");
+  close(arguments->client_socket);
 
+  printf("Done");
   return NULL;
   }
 
@@ -87,8 +90,12 @@ int main(int argc, char* argv[])
       continue;
       }
 
+    struct ThreadArgs* args = (struct ThreadArgs *)malloc(sizeof(struct ThreadArgs));
+    args->client_socket = *client_fd;
+    args->server = _server;
+
     pthread_t thread;
-    pthread_create(&thread, NULL, HandleClientRequest,(void *)client_fd);
+    pthread_create(&thread, NULL, HandleClientRequest,(void *)args);
     pthread_detach(thread);
     }
 
