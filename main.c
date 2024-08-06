@@ -1,3 +1,4 @@
+#include <signal.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <errno.h>
@@ -12,6 +13,8 @@
 #include "http/http.h"
 #include "webserverengine/webserverengine.h"
 
+int server_socket;
+
 struct ThreadArgs {
     int client_socket;
     struct serverSettings server;
@@ -25,11 +28,18 @@ void* HandleClientRequest(void *args)
   printf("\n - - New Request - - Responding to client sock %d \n", arguments->client_socket);
   GenerateResponse(arguments->server.serverPath,clientInfo);
 
-  respond(arguments->client_socket, "HTTP/1.1 200 OK\r\nContent-Type: text/html", "<b> hello World</b>\n");
+  respond(arguments->client_socket, "HTTP/1.1 200 OK\r\nContent-Type: text/html", "<b> hello World</b>");
   close(arguments->client_socket);
 
   printf("Done");
   return NULL;
+  }
+
+void closeSigHandler(int sig)
+  {
+  close(server_socket);
+  printf("\r\n -- Closing -- \r\n");
+  exit(0);
   }
 
 
@@ -46,10 +56,12 @@ int main(int argc, char* argv[])
     {
       return(errorCode);
     }
+  
+  signal(SIGINT, closeSigHandler);
 
   // ---- Bind and get the server up and running ------ \\\
 
-  int server_socket = socket(AF_INET,SOCK_STREAM,0);
+  server_socket = socket(AF_INET,SOCK_STREAM,0);
   struct sockaddr_in server_address, client_address;
   socklen_t client_len = sizeof(client_address);
 
