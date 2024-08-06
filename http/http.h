@@ -3,7 +3,6 @@
 
 struct ClientInformation 
   {
-  int client_socket;
   char method[16], path[256], protocol[16];
   };
 

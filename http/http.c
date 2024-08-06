@@ -12,18 +12,12 @@ const int BUFFER_SIZE = 9024;
 
 struct ClientInformation 
   {
-  int client_socket;
   char method[16], path[256], protocol[16];
   };
 
 struct ClientInformation GetClientConnection(int client_sock)
   {
   struct ClientInformation clientInfo = {};
-  
-  struct sockaddr_in client_address;
-  socklen_t client_len = sizeof(client_address);
-
-  //int client_sock = accept(server_socket, (struct sockaddr *)&client_address, &client_len);
 
   char buffer[BUFFER_SIZE];
   ssize_t bytes_recieved = recv(client_sock, buffer, BUFFER_SIZE, 0);
@@ -32,8 +26,6 @@ struct ClientInformation GetClientConnection(int client_sock)
     read(client_sock, buffer, BUFFER_SIZE - 1);
 
     sscanf(buffer, "%s %s %s",clientInfo.method, clientInfo.path, clientInfo.protocol);
-
-    clientInfo.client_socket = client_sock;
 
     toLower(clientInfo.path);
     toLower(clientInfo.protocol);
