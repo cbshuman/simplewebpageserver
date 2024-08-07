@@ -24,20 +24,15 @@ struct ThreadArgs {
 void* HandleClientRequest(void *args) {
     struct ThreadArgs* arguments = (struct ThreadArgs *)args;
 
-    // Log the new request
     printf("\n - - New Request - - Responding to client sock %d \n", arguments->client_socket);
 
-    // Extract client information
     struct ClientInformation clientInfo = GetClientConnection(arguments->client_socket);
-
-    // Generate the response
     struct generated_response generatedResponse = GenerateResponse(arguments->server.serverPath, clientInfo);
 
-    // Respond to the client
-    const char* header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nConnection: close\r\n";
+   // const char* header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nConnection: close\r\n";
     const char* content = generatedResponse.content; 
     char response[BUFFER_SIZ];
-    snprintf(response, BUFFER_SIZ, "%sContent-Length: %zu\r\n\r\n%s", header, strlen(content), content);
+    snprintf(response, BUFFER_SIZ, "%sContent-Length: %zu\r\n\r\n%s", generatedResponse.headers, strlen(content), content);
     
     int sendResponse = send(arguments->client_socket, response, strlen(response), 0);
 
@@ -46,16 +41,11 @@ void* HandleClientRequest(void *args) {
         printf("Error");
       }
 
-    // Log the response
-    printf("Count: %i Sending: %s\n", sendResponse, response);
+    //printf("Count: %i Sending: %s\n", sendResponse, response);
 
-    // Clean up
     close(arguments->client_socket);
     free(arguments);
-
-    // Indicate the thread is done
-    printf("Done\n");
-
+    printf(" - - - Done - - - \n");
     return NULL;
 }
 

@@ -26,7 +26,6 @@ struct ClientInformation GetClientConnection(int client_sock)
     {
     sscanf(buffer, "%s %s %s",clientInfo.method, clientInfo.path, clientInfo.protocol);
 
-    toLower(clientInfo.path);
     toLower(clientInfo.protocol);
     toLower(clientInfo.method);
     }
