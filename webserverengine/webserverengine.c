@@ -15,10 +15,10 @@ char* ReadFile(char* filePath)
   {
   printf("reading in file: %s\n", filePath);
   char *source = NULL; 
-  FILE *filePointer;
+  FILE *filePointer = fopen(filePath,"r");
   printf("Got my file pointer: ");
 
-  if (filePointer == fopen(filePath,"r")) 
+  if (filePointer != NULL) 
     {
     if(fseek(filePointer, 0L, SEEK_END) == 0)
       {
@@ -49,12 +49,12 @@ char* ReadFile(char* filePath)
         source[newLen++] = '\0';
         }
       }
+    fclose(filePointer);
     }
   else 
     {
-    printf("Cannot read file %s", filePath);
+    printf("Cannot read file %s\n", filePath);
     }
-  fclose(filePointer);
 
   printf("%s", source);
   return source;
@@ -78,9 +78,9 @@ struct generated_response GenerateResponse(char* fileLocation, struct ClientInfo
   snprintf(fullPath, sizeof(fullPath), "%s%s", fileLocation, clientInfo.path);
   response.content = ReadFile(fullPath);
 
-  if (response.content == NULL)
+  if(response.content == NULL)
     {
-    strcpy(response.content, "File not found!");
+    response.content = "404 - File not found!";
     }
 
   printf("returning: %s\n", response.content);
