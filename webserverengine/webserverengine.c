@@ -15,9 +15,10 @@ char* ReadFile(char* filePath)
   {
   printf("reading in file: %s\n", filePath);
   char *source = NULL; 
-  FILE *filePointer = fopen(filePath,"r");
+  FILE *filePointer;
+  printf("Got my file pointer: ");
 
-  if (filePointer != NULL) 
+  if (filePointer == fopen(filePath,"r")) 
     {
     if(fseek(filePointer, 0L, SEEK_END) == 0)
       {
@@ -68,6 +69,19 @@ struct generated_response GenerateResponse(char* fileLocation, struct ClientInfo
   printf("protocol: %s\n", clientInfo.protocol);
 
   //Need to find a way to differentiate between an API call and regular ol' file requests.
+  if(strcmp(clientInfo.path, "/") == 0)
+    {
+    strcpy(clientInfo.path, "/index.html");
+    }
+
+  char fullPath[1024];
+  snprintf(fullPath, sizeof(fullPath), "%s%s", fileLocation, clientInfo.path);
+  response.content = ReadFile(fullPath);
+
+  if (response.content == NULL)
+    {
+    strcpy(response.content, "File not found!");
+    }
 
   printf("returning: %s\n", response.content);
   return response;

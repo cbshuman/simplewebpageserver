@@ -31,21 +31,23 @@ void* HandleClientRequest(void *args) {
     struct ClientInformation clientInfo = GetClientConnection(arguments->client_socket);
 
     // Generate the response
-    GenerateResponse(arguments->server.serverPath, clientInfo);
+    struct generated_response generatedResponse = GenerateResponse(arguments->server.serverPath, clientInfo);
 
     // Respond to the client
     const char* header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nConnection: close\r\n";
-    const char* content = "<b>hello World</b>\r\n";
+    const char* content = generatedResponse.content; 
     char response[BUFFER_SIZ];
     snprintf(response, BUFFER_SIZ, "%sContent-Length: %zu\r\n\r\n%s", header, strlen(content), content);
     
-    if(send(arguments->client_socket, response, strlen(response), 0) < 0)
+    int sendResponse = send(arguments->client_socket, response, strlen(response), 0);
+
+    if(sendResponse < 0)
       {
         printf("Error");
       }
 
     // Log the response
-    printf("Sending: %s\n", response);
+    printf("Count: %i Sending: %s\n", sendResponse, response);
 
     // Clean up
     close(arguments->client_socket);

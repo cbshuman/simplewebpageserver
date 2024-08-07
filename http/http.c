@@ -20,16 +20,23 @@ struct ClientInformation GetClientConnection(int client_sock)
   struct ClientInformation clientInfo = {};
 
   char buffer[BUFFER_SIZE];
-  ssize_t bytes_recieved = recv(client_sock, buffer, BUFFER_SIZE, 0);
-  if(bytes_recieved > 0)
-    {
-    read(client_sock, buffer, BUFFER_SIZE - 1);
+  ssize_t bytes_received = recv(client_sock, buffer, BUFFER_SIZE, 0);
 
+  if(bytes_received > 0)
+    {
     sscanf(buffer, "%s %s %s",clientInfo.method, clientInfo.path, clientInfo.protocol);
 
     toLower(clientInfo.path);
     toLower(clientInfo.protocol);
     toLower(clientInfo.method);
+    }
+  else if (bytes_received == 0)
+    {
+    printf("Client closed the connection.\n");
+    }
+  else 
+    {
+    perror("recv failed");
     }
 
   return clientInfo;
