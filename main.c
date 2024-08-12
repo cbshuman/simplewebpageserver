@@ -14,7 +14,7 @@
 #include "webserverengine/webserverengine.h"
 
 int server_socket;
-int BUFFER_SIZ = 9080;
+int BUFFER_SIZ = 3081960;
 
 struct ThreadArgs {
     int client_socket;
@@ -27,24 +27,39 @@ void* HandleClientRequest(void *args) {
     printf("\n - - New Request - - Responding to client sock %d \n", arguments->client_socket);
 
     struct ClientInformation clientInfo = GetClientConnection(arguments->client_socket);
-    struct generated_response generatedResponse = GenerateResponse(arguments->server.serverPath, clientInfo);
 
-   // const char* header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nConnection: close\r\n";
-    const char* content = generatedResponse.content; 
+    if(strcmp(clientInfo.method, "") == 0)
+      {
+      return NULL;
+      }
+
+    struct generated_response generatedResponse = GenerateResponse(arguments->server.serverPath, clientInfo);
     char response[BUFFER_SIZ];
-    snprintf(response, BUFFER_SIZ, "%sContent-Length: %zu\r\n\r\n%s", generatedResponse.headers, strlen(content), content);
+
+    printf("%s", generatedResponse.content);
+    memcpy(response, generatedResponse.headers, strlen(generatedResponse.headers));
+    memcpy(response + strlen(generatedResponse.headers), generatedResponse.content, generatedResponse.contentLength);
+    printf("%s", response);
+   // memcpy(response, BUFFER_SIZ, "%s%s", generatedResponse.headers, generatedResponse.content);
     
-    int sendResponse = send(arguments->client_socket, response, strlen(response), 0);
+    int sendResponse = send(arguments->client_socket, response, generatedResponse.contentLength + strlen(generatedResponse.headers), 0);
 
     if(sendResponse < 0)
       {
-        printf("Error");
+      printf("Error");
       }
 
     //printf("Count: %i Sending: %s\n", sendResponse, response);
 
     close(arguments->client_socket);
     free(arguments);
+    //Need to find a better way to do this. . . 
+    if(generatedResponse.contentLength > 100)
+      {
+      free(generatedResponse.content);
+      }
+    free(generatedResponse.headers);
+
     printf(" - - - Done - - - \n");
     return NULL;
 }

@@ -9,10 +9,11 @@ struct generated_response
   {
     char* headers;
     char* content;
+    long contentLength;
   };
 
 //Might need to move this to utilities
-char* ReadFile(char* filePath)
+char* ReadFile(char* filePath, long* length)
   {
   printf("reading in file: %s\n", filePath);
   char *source = NULL; 
@@ -24,6 +25,7 @@ char* ReadFile(char* filePath)
     if(fseek(filePointer, 0L, SEEK_END) == 0)
       {
       long buffer_size = ftell(filePointer);
+      *length = buffer_size;
       printf("Buffer size %ld\n", buffer_size);
       if(buffer_size == -1)
         {
@@ -74,7 +76,7 @@ const char* GetMimeType(char * filePath)
     }
   else if(strcasecmp(extension,"ttf") == 0)
     {
-    return "application/x-font-ttf";
+    return "application/octet-stream";
     }
   return "text/html";
   }
@@ -90,7 +92,6 @@ struct generated_response GenerateResponse(char* fileLocation, struct ClientInfo
 
   if(strcmp(clientInfo.method,"get") == 0)
     {
-
     //Need to find a way to differentiate between an API call and regular ol' file requests.
     if(strcmp(clientInfo.path, "/") == 0)
       {
@@ -99,21 +100,28 @@ struct generated_response GenerateResponse(char* fileLocation, struct ClientInfo
 
     char fullPath[1024];
     snprintf(fullPath, sizeof(fullPath), "%s%s", fileLocation, clientInfo.path);
-    response.content = ReadFile(fullPath);
+    response.content = ReadFile(fullPath, &response.contentLength);
 
     response.headers = malloc(2048);
     if(response.content == NULL)
       {
       response.content = "404 - File not found!";
-      snprintf(response.headers, 2048, "HTTP/1.1 400 NOT FOUND\r\nContent-Type:%s\r\nConnection:close\r\n", GetMimeType(fullPath));
+      snprintf(response.headers, 2048, "HTTP/1.1 400 NOT FOUND\r\nContent-Type:%s\r\nConnection:close\r\nContent-Length:%zu\r\n\r\n",
+          GetMimeType(fullPath), response.contentLength);
       }
     else
       {
-      //header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nConnection: close\r\n";
-      snprintf(response.headers, 2048, "HTTP/1.1 200 OK\r\nContent-Type:%s\r\nConnection:close\r\n", GetMimeType(fullPath));
+      snprintf(response.headers, 2048, "HTTP/1.1 200 OK\r\nContent-Type:%s\r\nConnection:close\r\nContent-Length:%zu\r\n\r\n",
+          GetMimeType(fullPath), response.contentLength);
       }
     }
+  else 
+    {
+    response.content = "Unknown unkown request type!";
+    response.contentLength = strlen(response.content);
+    }
 
+  printf("Buffer size %ld\n", response.contentLength);
   printf("returning: %s\n", response.headers);
   return response;
   }
