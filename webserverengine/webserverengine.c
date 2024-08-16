@@ -78,6 +78,10 @@ const char* GetMimeType(char * filePath)
     {
     return "application/octet-stream";
     }
+  else if (strcasecmp(extension, "svg") == 0)
+    {
+    return "image/svg+xml";
+    }
   return "text/html";
   }
 
