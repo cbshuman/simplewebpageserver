@@ -36,11 +36,10 @@ void* HandleClientRequest(void *args) {
     struct generated_response generatedResponse = GenerateResponse(arguments->server.serverPath, clientInfo);
     char response[BUFFER_SIZ];
 
-    printf("%s", generatedResponse.content);
+    //printf("%s", generatedResponse.content);
     memcpy(response, generatedResponse.headers, strlen(generatedResponse.headers));
     memcpy(response + strlen(generatedResponse.headers), generatedResponse.content, generatedResponse.contentLength);
-    printf("%s", response);
-   // memcpy(response, BUFFER_SIZ, "%s%s", generatedResponse.headers, generatedResponse.content);
+    //printf("%s", response);
     
     int sendResponse = send(arguments->client_socket, response, generatedResponse.contentLength + strlen(generatedResponse.headers), 0);
 
@@ -49,15 +48,11 @@ void* HandleClientRequest(void *args) {
       printf("Error");
       }
 
-    //printf("Count: %i Sending: %s\n", sendResponse, response);
-
     close(arguments->client_socket);
+    
+    //Free everything associated with the request
     free(arguments);
-    //Need to find a better way to do this. . . 
-    if(generatedResponse.contentLength > 100)
-      {
-      free(generatedResponse.content);
-      }
+    free(generatedResponse.content);
     free(generatedResponse.headers);
 
     printf(" - - - Done - - - \n");

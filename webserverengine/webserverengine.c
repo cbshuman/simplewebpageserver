@@ -109,7 +109,9 @@ struct generated_response GenerateResponse(char* fileLocation, struct ClientInfo
     response.headers = malloc(2048);
     if(response.content == NULL)
       {
-      response.content = "404 - File not found!";
+      response.content = malloc(2048);
+      snprintf(response.content, 2048,"File not found!");
+      //response.content = "404 - File not found!";
       snprintf(response.headers, 2048, "HTTP/1.1 400 NOT FOUND\r\nContent-Type:%s\r\nConnection:close\r\nContent-Length:%zu\r\n\r\n",
           GetMimeType(fullPath), response.contentLength);
       }
@@ -121,7 +123,9 @@ struct generated_response GenerateResponse(char* fileLocation, struct ClientInfo
     }
   else 
     {
-    response.content = "Unknown unkown request type!";
+    response.content = malloc(2048);
+    snprintf(response.content, 2048,"Unknown Request Type");
+    //response.content = "Unknown unkown request type!";
     response.contentLength = strlen(response.content);
     }
 
