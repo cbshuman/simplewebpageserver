@@ -36,10 +36,8 @@ void* HandleClientRequest(void *args) {
     struct generated_response generatedResponse = GenerateResponse(arguments->server.serverPath, clientInfo);
     char response[BUFFER_SIZ];
 
-    //printf("%s", generatedResponse.content);
     memcpy(response, generatedResponse.headers, strlen(generatedResponse.headers));
     memcpy(response + strlen(generatedResponse.headers), generatedResponse.content, generatedResponse.contentLength);
-    //printf("%s", response);
     
     int sendResponse = send(arguments->client_socket, response, generatedResponse.contentLength + strlen(generatedResponse.headers), 0);
 
@@ -51,7 +49,7 @@ void* HandleClientRequest(void *args) {
     close(arguments->client_socket);
     
     //Free everything associated with the request
-    free(arguments);
+    free(args);
     free(generatedResponse.content);
     free(generatedResponse.headers);
 

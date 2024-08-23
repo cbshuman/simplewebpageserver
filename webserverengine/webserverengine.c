@@ -124,12 +124,9 @@ struct generated_response GenerateResponse(char* fileLocation, struct ClientInfo
     {
     response.content = malloc(2048);
     snprintf(response.content, 2048,"Unknown Request Type");
-    //response.content = "Unknown unkown request type!";
     response.contentLength = strlen(response.content);
     }
 
-  printf("Buffer size %ld\n", response.contentLength);
-  printf("returning: %s\n", response.headers);
   return response;
   }
 
