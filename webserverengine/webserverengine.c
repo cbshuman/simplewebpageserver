@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -107,17 +108,16 @@ struct generated_response GenerateResponse(char* fileLocation, struct ClientInfo
     response.content = ReadFile(fullPath, &response.contentLength);
 
     response.headers = malloc(2048);
-    if(response.content == NULL)
-      {
-      response.content = malloc(2048);
-      snprintf(response.content, 2048,"File not found!");
-      //response.content = "404 - File not found!";
-      snprintf(response.headers, 2048, "HTTP/1.1 400 NOT FOUND\r\nContent-Type:%s\r\nConnection:close\r\nContent-Length:%zu\r\n\r\n",
-          GetMimeType(fullPath), response.contentLength);
-      }
-    else
+    if(response.content != NULL)
       {
       snprintf(response.headers, 2048, "HTTP/1.1 200 OK\r\nContent-Type:%s\r\nConnection:close\r\nContent-Length:%zu\r\n\r\n",
+          GetMimeType(fullPath), response.contentLength);
+      }
+    else 
+      {
+      response.content = malloc(2048);
+      snprintf(response.content, 2048,"<File/API Request> was not found!");
+      snprintf(response.headers, 2048, "HTTP/1.1 400 NOT FOUND\r\nContent-Type:%s\r\nConnection:close\r\nContent-Length:%zu\r\n\r\n",
           GetMimeType(fullPath), response.contentLength);
       }
     }
